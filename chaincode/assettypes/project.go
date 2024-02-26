@@ -68,5 +68,11 @@ var Project = assets.AssetType{
 				return nil
 			},
 		},
+		{
+			Required:     false,
+			Tag:          "lastAction",
+			Label:        "last action made onto this asset",
+			DataType:     "string",
+		},
 	},
 }
