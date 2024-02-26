@@ -69,10 +69,10 @@ var Project = assets.AssetType{
 			},
 		},
 		{
-			Required:     false,
-			Tag:          "lastAction",
-			Label:        "last action made onto this asset",
-			DataType:     "string",
+			Required: false,
+			Tag:      "lastAction",
+			Label:    "last action made onto this asset",
+			DataType: "string",
 		},
 	},
 }
