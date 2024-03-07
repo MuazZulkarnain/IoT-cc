@@ -2,6 +2,8 @@ package txdefs
 
 import (
 	"encoding/json"
+	"fmt"
+	"time"
 
 	"github.com/hyperledger-labs/cc-tools/assets"
 	"github.com/hyperledger-labs/cc-tools/errors"
@@ -85,9 +87,6 @@ var TransferCarbonCredit = tx.Transaction{
 			return nil, errors.WrapError(nil, "Insufficient carbon credits in fromProject")
 		}
 
-		// Update the amount in the fromProject
-		fromProjectMap["amount"] = fromProjectAmount - amount
-
 		// Update the amount in the toProject
 		toProjectMap := (map[string]interface{})(*toProjectAsset)
 		toProjectAmount, ok := toProjectMap["amount"].(float64)
@@ -95,7 +94,14 @@ var TransferCarbonCredit = tx.Transaction{
 			return nil, errors.WrapError(nil, "toProject does not have a valid amount field")
 		}
 
+		// Update the latest amount in both sender and receiver
+		fromProjectMap["amount"] = fromProjectAmount - amount
 		toProjectMap["amount"] = toProjectAmount + amount
+
+		// Update lastAction with the last action made and the timestamp
+		malaysiaTime := time.Now().UTC().Add(8 * time.Hour)
+		fromProjectMap["lastAction"] = fmt.Sprintf("Sent %.2f tokens to %s at %s", amount, toProjectMap["project"], malaysiaTime.Format(time.RFC3339))
+		toProjectMap["lastAction"] = fmt.Sprintf("Received %.2f tokens from %s at %s", amount, fromProjectMap["project"], malaysiaTime.Format(time.RFC3339))
 
 		// Save the updated fromProject asset back to the ledger
 		_, err = fromProjectKey.Update(stub, fromProjectMap)

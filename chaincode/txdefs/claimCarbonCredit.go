@@ -2,6 +2,8 @@ package txdefs
 
 import (
 	"encoding/json"
+	"fmt"
+	"time"
 
 	"github.com/hyperledger-labs/cc-tools/assets"
 	"github.com/hyperledger-labs/cc-tools/errors"
@@ -77,6 +79,10 @@ var ClaimCarbonCredit = tx.Transaction{
 
 		// Update the amount in the project
 		projectMap["amount"] = projectAmount - amount
+
+		// Update lastAction with the last action made and the timestamp
+		malaysiaTime := time.Now().UTC().Add(8 * time.Hour)
+		projectMap["lastAction"] = fmt.Sprintf("Claimed %.2f tokens at %s", amount, malaysiaTime.Format(time.RFC3339))
 
 		// Save the updated project asset back to the ledger
 		_, err = projectKey.Update(stub, projectMap)
