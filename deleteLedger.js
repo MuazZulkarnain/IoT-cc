@@ -7,28 +7,16 @@ async function initializeLedger() {
     const payloads = [];
 
     for (let i = 1; i <= 40; i++) {
-      let project = faker.company.name(); // Define project variable
-      let date = new Date();
-      let localtime = new Date(date.getTime() + 8 * 60 * 60000); // Adjust for Malaysia timezone (UTC+8)
-
       const payload = {
         "@assetType": "project",
-        project: project,
-        amount: _.random(50, 200),
-        claimAmount: _.random(100, 300),
-        lastAction: `Initialized ${project} at ${localtime.toLocaleString(
-          "en-US",
-          {
-            timeZone: "Asia/Kuala_Lumpur", // Specify the timezone
-          }
-        )}`,
+        project: `0${i}`,
       };
 
       payloads.push(payload);
     }
 
     const response = await axios.post(
-      "http://localhost:80/api/invoke/createAsset",
+      "http://localhost:80/api/invoke/deleteAsset",
       {
         asset: payloads,
       },
