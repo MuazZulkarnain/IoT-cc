@@ -1,37 +1,55 @@
 const axios = require("axios");
-const { faker } = require("@faker-js/faker");
-const _ = require("lodash");
 
-async function initializeLedger() {
-  try {
-    const payloads = [];
-
-    for (let i = 1; i <= 40; i++) {
-      const payload = {
+async function searchProjects() {
+  const url = "http://localhost/api/query/search";
+  const requestData = {
+    query: {
+      selector: {
         "@assetType": "project",
-        project: `0${i}`,
-      };
-
-      payloads.push(payload);
-    }
-
-    const response = await axios.post(
-      "http://localhost:80/api/invoke/deleteAsset",
-      {
-        asset: payloads,
       },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          "cache-control": "no-cache",
-        },
-      }
-    );
+    },
+  };
 
-    console.log("API response:", response.data);
+  try {
+    const response = await axios.post(url, requestData);
+    const keysArray = response.data.result.map((project) => project["@key"]);
+    return keysArray;
+  } catch (error) {
+    throw error.response ? error.response.data : error.message;
+  }
+}
+
+async function deleteLedger() {
+  try {
+    const keysArray = await searchProjects();
+
+    // Construct payloads for each key
+    const payloads = keysArray.map((key) => ({
+      key: {
+        "@assetType": "project",
+        "@key": key,
+      },
+    }));
+
+    // Make DELETE requests for each payload
+    await Promise.all(
+      payloads.map(async (payload) => {
+        const response = await axios.delete(
+          "http://localhost/api/invoke/deleteAsset",
+          {
+            data: payload,
+            headers: {
+              "Content-Type": "application/json",
+              accept: "*/*",
+            },
+          }
+        );
+        console.log("API response:", response.data);
+      })
+    );
   } catch (error) {
     console.error("Error calling API:", error.message);
   }
 }
 
-initializeLedger();
+deleteLedger();
