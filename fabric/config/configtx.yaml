@@ -287,7 +287,7 @@ Orderer: &OrdererDefaults
     # this value will be rejected by ordering. If the "kafka" OrdererType is
     # selected, set 'message.max.bytes' and 'replica.fetch.max.bytes' on
     # the Kafka brokers to a value that is larger than this one.
-    AbsoluteMaxBytes: 10 MB
+    AbsoluteMaxBytes: 100 MB
 
     # Preferred Max Bytes: The preferred maximum number of bytes allowed
     # for the serialized messages in a batch. Roughly, this field may be considered
@@ -300,7 +300,7 @@ Orderer: &OrdererDefaults
     # will contain only that message.  Because messages may be larger than
     # preferred max bytes (up to AbsoluteMaxBytes), some batches may exceed
     # the preferred max bytes, but will always contain exactly one transaction.
-    PreferredMaxBytes: 2 MB
+    PreferredMaxBytes: 500 B
 
   # Max Channels is the maximum number of channels to allow on the ordering
   # network. When set to 0, this implies no maximum number of channels.
