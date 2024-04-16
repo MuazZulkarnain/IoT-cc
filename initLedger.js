@@ -6,7 +6,7 @@ async function initializeLedger() {
   try {
     const payloads = [];
 
-    for (let i = 1; i <= 40; i++) {
+    for (let i = 1; i <= 1000000; i++) {
       let project = faker.company.name(); // Define project variable
       let date = new Date();
       let localtime = new Date(date.getTime() + 8 * 60 * 60000); // Adjust for Malaysia timezone (UTC+8)
