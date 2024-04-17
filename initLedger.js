@@ -3,9 +3,9 @@ const _ = require("lodash");
 
 async function initializeLedger() {
   const apiUrl = "http://localhost:80/api/invoke/createAsset";
-  const totalAssets = 20;
-  const batchSize = 5;
-  const delayBetweenBatches = 2000;
+  const totalAssets = 1000;
+  const batchSize = 200;
+  const delayBetweenBatches = 1000;
 
   try {
     for (let i = 0; i < totalAssets; i += batchSize) {
@@ -30,7 +30,7 @@ function generatePayloads(batchSize, startIndex) {
   const payloads = [];
 
   for (let j = 0; j < batchSize; j++) {
-    const projectName = `Power ${startIndex + j + 1}`; // Generate project name based on index
+    const projectName = `Powerplant ${startIndex + j + 1}`; // Generate project name based on index
     const amount = _.random(50, 200);
     const claimAmount = _.random(100, 300);
     const lastAction = `Initialized ${projectName} at ${getCurrentTime()}`;
