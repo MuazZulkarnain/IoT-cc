@@ -1,37 +1,59 @@
 const axios = require("axios");
-const { faker } = require("@faker-js/faker");
 const _ = require("lodash");
 
 async function initializeLedger() {
+  const apiUrl = "http://localhost:80/api/invoke/createAsset";
+  const totalAssets = 20;
+  const batchSize = 5;
+  const delayBetweenBatches = 2000;
+
   try {
-    const payloads = [];
+    for (let i = 0; i < totalAssets; i += batchSize) {
+      const payloads = generatePayloads(batchSize, i);
 
-    for (let i = 1; i <= 1000000; i++) {
-      let project = faker.company.name(); // Define project variable
-      let date = new Date();
-      let localtime = new Date(date.getTime() + 8 * 60 * 60000); // Adjust for Malaysia timezone (UTC+8)
+      const response = await sendBatchRequest(apiUrl, payloads);
 
-      const payload = {
-        "@assetType": "project",
-        project: project,
-        amount: _.random(50, 200),
-        claimAmount: _.random(100, 300),
-        lastAction: `Initialized ${project} at ${localtime.toLocaleString(
-          "en-US",
-          {
-            timeZone: "Asia/Kuala_Lumpur", // Specify the timezone
-          }
-        )}`,
-      };
+      console.log(`Batch ${i + 1}-${i + payloads.length} sent successfully.`);
 
-      payloads.push(payload);
+      if (i + batchSize < totalAssets) {
+        await delay(delayBetweenBatches);
+      }
     }
 
+    console.log("Initialization completed successfully.");
+  } catch (error) {
+    console.error("Error initializing ledger:", error.message);
+  }
+}
+
+function generatePayloads(batchSize, startIndex) {
+  const payloads = [];
+
+  for (let j = 0; j < batchSize; j++) {
+    const projectName = `Power ${startIndex + j + 1}`; // Generate project name based on index
+    const amount = _.random(50, 200);
+    const claimAmount = _.random(100, 300);
+    const lastAction = `Initialized ${projectName} at ${getCurrentTime()}`;
+
+    const payload = {
+      "@assetType": "project",
+      project: projectName,
+      amount: amount,
+      claimAmount: claimAmount,
+      lastAction: lastAction,
+    };
+
+    payloads.push(payload);
+  }
+
+  return payloads;
+}
+
+async function sendBatchRequest(url, payloads) {
+  try {
     const response = await axios.post(
-      "http://localhost:80/api/invoke/createAsset",
-      {
-        asset: payloads,
-      },
+      url,
+      { asset: payloads },
       {
         headers: {
           "Content-Type": "application/json",
@@ -40,10 +62,28 @@ async function initializeLedger() {
       }
     );
 
-    console.log("API response:", response.data);
+    return response;
   } catch (error) {
-    console.error("Error calling API:", error.message);
+    if (error.response) {
+      console.error(
+        `Request failed with status ${error.response.status}:`,
+        error.response.data
+      );
+    } else {
+      console.error("Request failed:", error.message);
+    }
+    throw error;
   }
+}
+
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function getCurrentTime() {
+  const date = new Date();
+  const localtime = new Date(date.getTime() + 8 * 60 * 60000); // Adjust for Malaysia timezone (UTC+8)
+  return localtime.toLocaleString("en-US", { timeZone: "Asia/Kuala_Lumpur" });
 }
 
 initializeLedger();
