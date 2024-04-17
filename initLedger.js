@@ -4,7 +4,7 @@ const _ = require("lodash");
 async function initializeLedger() {
   const apiUrl = "http://localhost:80/api/invoke/createAsset";
   const totalAssets = 1000;
-  const batchSize = 200;
+  const batchSize = 500;
   const delayBetweenBatches = 1000;
 
   try {

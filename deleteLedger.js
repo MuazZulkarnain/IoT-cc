@@ -1,19 +1,25 @@
 const axios = require("axios");
 
-async function searchProjects() {
-  const url = "http://localhost/api/query/search";
-  const requestData = {
-    query: {
-      selector: {
-        "@assetType": "project",
-      },
-    },
-  };
+// Create a shared Axios instance
+const apiClient = axios.create({
+  baseURL: "http://localhost/api",
+  headers: {
+    "Content-Type": "application/json",
+    accept: "*/*",
+  },
+});
 
+async function searchProjects() {
   try {
-    const response = await axios.post(url, requestData);
-    const keysArray = response.data.result.map((project) => project["@key"]);
-    return keysArray;
+    const requestData = {
+      query: {
+        selector: {
+          "@assetType": "project",
+        },
+      },
+    };
+    const response = await apiClient.post("/query/search", requestData);
+    return response.data.result.map((project) => project["@key"]);
   } catch (error) {
     throw error.response ? error.response.data : error.message;
   }
@@ -31,24 +37,21 @@ async function deleteLedger() {
       },
     }));
 
-    // Make DELETE requests for each payload
+    // Make DELETE requests for each payload, controlling concurrency
     await Promise.all(
       payloads.map(async (payload) => {
-        const response = await axios.delete(
-          "http://localhost/api/invoke/deleteAsset",
-          {
+        try {
+          const response = await apiClient.delete("/invoke/deleteAsset", {
             data: payload,
-            headers: {
-              "Content-Type": "application/json",
-              accept: "*/*",
-            },
-          }
-        );
-        console.log("API response:", response.data);
+          });
+          console.log("API response:", response.data);
+        } catch (error) {
+          console.error("Error deleting asset:", error.message);
+        }
       })
     );
   } catch (error) {
-    console.error("Error calling API:", error.message);
+    console.error("Error searching projects:", error.message);
   }
 }
 
